@@ -1,0 +1,517 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interactive Guide to Financial RAG Implementation</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Chosen Palette: Calm Harmony -->
+    <!-- Application Structure Plan: The application is designed as an interactive, single-page dashboard to guide users through the complex topic of Financial RAG systems. It departs from the linear report structure to create a more intuitive user journey based on logical themes: 1. 'Why RAG?' (Hero Section): Grabs user attention with the core value proposition. 2. 'The RAG Workflow' (Interactive Diagram): Visually explains the 'how' in a digestible, step-by-step format. 3. 'Core Challenges & Solutions' (Tabbed Interface): A deep-dive section allowing users to explore the 'what'—the key technical hurdles (Parsing, Chunking, On-Premise Costs)—in a self-directed manner. This is more engaging than reading through long sections. 4. 'Implementation Playbook' (Accordion): Presents the 'now what'—the final recommendations as an actionable, easy-to-navigate checklist. This structure facilitates better understanding and retention by breaking down dense information into manageable, interactive modules. -->
+    <!-- Visualization & Content Choices: The application uses a variety of interactive elements to make the report's content accessible and engaging, strictly avoiding SVG and Mermaid JS. - Report Info: Core RAG process -> Goal: Explain the multi-step workflow -> Viz: Interactive Diagram (HTML/CSS/JS) -> Interaction: Users click on a stage to reveal a detailed explanation. -> Justification: More engaging and less intimidating than a static text block. - Report Info: Comparison of Chunking Strategies -> Goal: Compare qualitative attributes -> Viz: Polar Area Chart (Chart.js) -> Interaction: Hovering over segments reveals scores. -> Justification: Provides a quick, multi-dimensional visual summary of complex trade-offs. - Report Info: Chunk size performance impact -> Goal: Show quantitative relationship -> Viz: Bar Chart (Chart.js) -> Interaction: Tooltips on hover show specific performance data. -> Justification: Clearly visualizes the report's finding that moderate chunk sizes are optimal. - Report Info: Actionable Recommendations -> Goal: Organize final steps -> Viz: Accordion (HTML/CSS/JS) -> Interaction: Click to expand/collapse. -> Justification: Presents a dense list of recommendations in a clean, organized, and user-friendly format. -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #F5F5F4; /* warm neutral background */
+            color: #2d3748;
+        }
+        .bg-primary { background-color: #F5F5F4; }
+        .bg-secondary { background-color: #FFFFFF; }
+        .text-primary { color: #2d3748; }
+        .text-secondary { color: #4a5568; }
+        .text-accent { color: #047857; } /* Muted Teal/Green */
+        .border-accent { border-color: #047857; }
+        .bg-accent { background-color: #047857; }
+        .bg-accent-light { background-color: #D1FAE5; }
+        .tab-active {
+            border-bottom: 2px solid #047857;
+            color: #047857;
+            font-weight: 600;
+        }
+        .tab-inactive {
+            border-bottom: 2px solid transparent;
+            color: #4a5568;
+        }
+        .accordion-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease-in-out;
+        }
+        .chart-container {
+            position: relative;
+            margin: auto;
+            height: 350px;
+            width: 100%;
+            max-width: 500px;
+        }
+    </style>
+</head>
+<body class="bg-primary">
+
+    <header class="bg-secondary shadow-sm sticky top-0 z-50">
+        <nav class="container mx-auto px-6 py-4 flex justify-between items-center">
+            <h1 class="text-xl font-bold text-accent">Financial RAG Playbook</h1>
+            <div class="hidden md:flex space-x-8">
+                <a href="#overview" class="text-secondary hover:text-accent transition">Overview</a>
+                <a href="#workflow" class="text-secondary hover:text-accent transition">Workflow</a>
+                <a href="#challenges" class="text-secondary hover:text-accent transition">Core Challenges</a>
+                <a href="#playbook" class="text-secondary hover:text-accent transition">Playbook</a>
+            </div>
+        </nav>
+    </header>
+
+    <main class="container mx-auto p-4 md:p-8">
+
+        <section id="overview" class="text-center py-16">
+            <h2 class="text-4xl md:text-5xl font-bold text-primary mb-4">Transforming Finance with On-Premise RAG</h2>
+            <p class="text-lg text-secondary max-w-3xl mx-auto mb-8">Retrieval-Augmented Generation (RAG) is a strategic imperative for finance, providing the accuracy, currency, and security that standard LLMs lack. This guide explores how to build a robust, on-premise RAG system using open-source tools.</p>
+            <div class="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto">
+                <div class="bg-secondary p-6 rounded-lg shadow">
+                    <h3 class="font-bold text-xl mb-2 text-accent">🎯 Enhanced Accuracy</h3>
+                    <p class="text-secondary">Mitigates LLM "hallucinations" by grounding responses in verified, real-time financial data, crucial for high-stakes decisions.</p>
+                </div>
+                <div class="bg-secondary p-6 rounded-lg shadow">
+                    <h3 class="font-bold text-xl mb-2 text-accent">⏱️ Real-Time Information</h3>
+                    <p class="text-secondary">Connects to live data feeds, news, and internal knowledge bases, overcoming the static nature of pre-trained models.</p>
+                </div>
+                <div class="bg-secondary p-6 rounded-lg shadow">
+                    <h3 class="font-bold text-xl mb-2 text-accent">🔒 Data Security & Control</h3>
+                    <p class="text-secondary">An on-premise deployment with Ollama keeps proprietary financial data within your infrastructure, ensuring maximum security.</p>
+                </div>
+            </div>
+        </section>
+
+        <section id="workflow" class="py-16">
+            <div class="text-center mb-12">
+                <h2 class="text-3xl font-bold text-primary">The RAG Workflow: From Document to Insight</h2>
+                <p class="text-lg text-secondary mt-2 max-w-2xl mx-auto">This interactive diagram illustrates the core stages of a RAG pipeline. Click on each step to learn more about its role in the process.</p>
+            </div>
+            <div class="flex flex-col md:flex-row items-center justify-center space-y-4 md:space-y-0 md:space-x-4 mb-8">
+                 <div class="workflow-stage-container" data-target="info-ingestion">
+                    <div class="font-mono text-sm">1. Ingestion</div>
+                </div>
+                <div class="text-2xl text-accent-light">➡️</div>
+                <div class="workflow-stage-container" data-target="info-preprocessing">
+                    <div class="font-mono text-sm">2. Pre-processing</div>
+                </div>
+                <div class="text-2xl text-accent-light">➡️</div>
+                <div class="workflow-stage-container" data-target="info-indexing">
+                    <div class="font-mono text-sm">3. Indexing</div>
+                </div>
+                <div class="text-2xl text-accent-light">➡️</div>
+                 <div class="workflow-stage-container" data-target="info-retrieval">
+                    <div class="font-mono text-sm">4. Retrieval</div>
+                </div>
+                 <div class="text-2xl text-accent-light">➡️</div>
+                <div class="workflow-stage-container" data-target="info-generation">
+                    <div class="font-mono text-sm">5. Generation</div>
+                </div>
+            </div>
+            <div id="workflow-info" class="bg-secondary p-6 rounded-lg shadow-inner max-w-4xl mx-auto min-h-[150px] transition-all duration-300">
+                <div id="info-initial" class="workflow-info-panel">
+                    <h4 class="font-bold text-lg text-accent">Click a stage to see details</h4>
+                    <p class="text-secondary mt-2">Explore the end-to-end process of how a RAG system turns raw documents into precise, context-aware answers.</p>
+                </div>
+                <div id="info-ingestion" class="workflow-info-panel hidden">
+                    <h4 class="font-bold text-lg text-accent">1. Document Ingestion</h4>
+                    <p class="text-secondary mt-2">The process begins by loading diverse financial documents (PDFs, reports, filings) into the system. This raw data forms the knowledge base from which the RAG system will draw its insights.</p>
+                </div>
+                <div id="info-preprocessing" class="workflow-info-panel hidden">
+                    <h4 class="font-bold text-lg text-accent">2. Pre-processing & Chunking</h4>
+                    <p class="text-secondary mt-2">Documents are parsed and cleaned. Tools like `unstructured.io` identify and extract elements like text, tables, and titles. The text is then broken down into smaller, semantically coherent "chunks" for effective processing.</p>
+                </div>
+                <div id="info-indexing" class="workflow-info-panel hidden">
+                    <h4 class="font-bold text-lg text-accent">3. Embedding & Indexing</h4>
+                    <p class="text-secondary mt-2">Each chunk is converted into a numerical representation (an embedding) using a specialized model. These embeddings are stored in a vector database, which allows for fast and efficient similarity searches.</p>
+                </div>
+                <div id="info-retrieval" class="workflow-info-panel hidden">
+                    <h4 class="font-bold text-lg text-accent">4. Retrieval</h4>
+                    <p class="text-secondary mt-2">When a user asks a question, the query is also converted to an embedding. The vector database then retrieves the most relevant chunks from the knowledge base by finding the embeddings closest to the query's embedding.</p>
+                </div>
+                <div id="info-generation" class="workflow-info-panel hidden">
+                    <h4 class="font-bold text-lg text-accent">5. Generation</h4>
+                    <p class="text-secondary mt-2">The original query and the retrieved chunks of relevant information are passed to the LLM (e.g., via Ollama). The LLM uses this rich context to generate a factually grounded, accurate, and relevant answer.</p>
+                </div>
+            </div>
+        </section>
+
+        <section id="challenges" class="py-16">
+            <div class="text-center mb-12">
+                <h2 class="text-3xl font-bold text-primary">Core Challenges & Solutions</h2>
+                <p class="text-lg text-secondary mt-2 max-w-2xl mx-auto">Building a financial RAG system involves overcoming specific hurdles. Here we explore the most critical challenges and the recommended strategies to address them.</p>
+            </div>
+            
+            <div class="bg-secondary rounded-lg shadow p-2 md:p-8">
+                <div class="border-b border-gray-200 mb-6">
+                    <nav class="flex flex-wrap -mb-px" id="tabs">
+                        <button class="tab-btn px-4 py-3 text-sm md:text-base tab-active" data-target="tab-parsing">📄 Document Parsing</button>
+                        <button class="tab-btn px-4 py-3 text-sm md:text-base tab-inactive" data-target="tab-chunking">🧩 Chunking Strategy</button>
+                        <button class="tab-btn px-4 py-3 text-sm md:text-base tab-inactive" data-target="tab-onpremise">🖥️ On-Premise Reality</button>
+                    </nav>
+                </div>
+
+                <div id="tab-content">
+                    <div id="tab-parsing" class="tab-pane">
+                        <h3 class="text-2xl font-semibold mb-4 text-primary">The Challenge of Financial PDFs</h3>
+                        <p class="text-secondary mb-6">Financial documents are notoriously difficult to parse due to complex layouts, embedded tables, scanned text requiring OCR, and meaningful formatting (e.g., bold headers). Simple text extraction fails to capture the critical structure and context.</p>
+                        <div class="grid md:grid-cols-2 gap-8 items-center">
+                            <div>
+                                <h4 class="font-bold text-lg text-accent mb-2">Solution: `unstructured.io`</h4>
+                                <p class="text-secondary mb-4">`unstructured.io` is a powerful tool designed to deconstruct these complex documents. It doesn't just extract text; it identifies and preserves semantic elements like titles, narrative text, and tables.</p>
+                                <div class="bg-accent-light border-l-4 border-accent text-accent-dark p-4 rounded-r-lg">
+                                    <p class="font-bold">Key Strategy: Use `High Res` Partitioning</p>
+                                    <p class="text-sm mt-1">For documents with tables, the `High Res` strategy is essential. It ensures accurate extraction of tabular data into a structured format (like HTML), preserving the numerical data integrity vital for financial analysis.</p>
+                                </div>
+                            </div>
+                            <div class="bg-gray-100 p-4 rounded-lg">
+                                <h4 class="font-semibold text-center mb-2">From Chaos to Structure</h4>
+                                <div class="flex justify-between items-center">
+                                     <div class="w-1/2 p-2 text-center">
+                                        <p class="font-mono text-sm border-2 border-dashed border-red-400 p-2 rounded">Raw PDF Text<br>[Unstructured Blob]</p>
+                                     </div>
+                                     <div class="text-2xl text-accent">→</div>
+                                     <div class="w-1/2 p-2 font-mono text-sm">
+                                        <div class="border border-green-500 p-1 rounded mb-1 bg-green-50 text-xs">[Title: Q4 Report]</div>
+                                        <div class="border border-green-500 p-1 rounded mb-1 bg-green-50 text-xs">[Text: Revenue grew...]</div>
+                                        <div class="border border-green-500 p-1 rounded bg-green-50 text-xs">[Table: Financials]</div>
+                                     </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div id="tab-chunking" class="tab-pane hidden">
+                        <h3 class="text-2xl font-semibold mb-4 text-primary">Finding the Optimal Chunking Strategy</h3>
+                        <p class="text-secondary mb-6">Chunking—splitting documents into smaller pieces for retrieval—is critical for RAG performance. The right strategy preserves context and improves retrieval accuracy. Below, we compare common strategies and visualize the impact of chunk size.</p>
+                         <div class="grid md:grid-cols-2 gap-8 items-start">
+                            <div class="chart-container"><canvas id="chunkingStrategyChart"></canvas></div>
+                            <div class="chart-container"><canvas id="chunkSizeChart"></canvas></div>
+                        </div>
+                         <div class="mt-8">
+                            <h4 class="font-bold text-lg text-accent mb-2">Key Recommendation: Context is King</h4>
+                            <p class="text-secondary">For financial data, context is paramount. A number like "15%" is meaningless without knowing the company, metric, and time period. Therefore, advanced strategies are recommended:</p>
+                             <ul class="list-disc list-inside mt-4 space-y-2 text-secondary">
+                                <li><strong>Contextual Chunking:</strong> Offered by `unstructured.io`, this prepends chunk-specific context (e.g., "From Apple's Q4 2024 report, section on iPhone sales...") to each chunk *before* embedding. This has been shown to reduce retrieval failures by 35%.</li>
+                                <li><strong>Structural Chunking:</strong> Using `unstructured.io`'s `by_title` strategy maintains section integrity, ensuring chunks don't bleed across unrelated topics like "Risk Factors" and "MD&A".</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div id="tab-onpremise" class="tab-pane hidden">
+                        <h3 class="text-2xl font-semibold mb-4 text-primary">The On-Premise Reality: Cost vs. Control</h3>
+                        <p class="text-secondary mb-6">Deploying a RAG system on-premise with "free" LLMs like those available through Ollama offers maximum data control but shifts the financial model. The cost of API calls is replaced by significant investment in hardware and expertise.</p>
+                        <div class="bg-gray-100 p-6 rounded-lg">
+                            <h4 class="font-semibold text-lg text-center mb-4">Total Cost of Ownership Breakdown</h4>
+                            <div class="grid md:grid-cols-3 gap-6 text-center">
+                                <div>
+                                    <div class="text-4xl mb-2">💾</div>
+                                    <h5 class="font-bold text-primary">Capital Expenditure (CAPEX)</h5>
+                                    <p class="text-sm text-secondary">Initial, substantial investment in high-performance servers, especially GPUs, which are critical for running LLMs and vector searches efficiently.</p>
+                                </div>
+                                 <div>
+                                    <div class="text-4xl mb-2">⚡️</div>
+                                    <h5 class="font-bold text-primary">Operational Expenses (OPEX)</h5>
+                                    <p class="text-sm text-secondary">Ongoing costs for power, cooling, and physical maintenance of the server infrastructure. These can be significant for high-compute hardware.</p>
+                                </div>
+                                <div>
+                                    <div class="text-4xl mb-2">👩‍💻</div>
+                                    <h5 class="font-bold text-primary">Human Capital</h5>
+                                    <p class="text-sm text-secondary">The "hidden cost" of hiring or training specialized talent (ML Engineers, Data Scientists, MLOps) to set up, configure, optimize, and maintain the system.</p>
+                                </div>
+                            </div>
+                            <div class="mt-6 bg-accent-light border-l-4 border-accent p-4 rounded-r-lg">
+                                <p class="font-bold text-accent">The Takeaway</p>
+                                <p class="text-sm mt-1 text-accent-dark">"Free" LLMs eliminate licensing fees, not total cost. A successful on-premise strategy requires realistic budgeting for the full lifecycle of infrastructure and personnel.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="playbook" class="py-16">
+            <div class="text-center mb-12">
+                <h2 class="text-3xl font-bold text-primary">Your On-Premise Financial RAG Playbook</h2>
+                <p class="text-lg text-secondary mt-2 max-w-2xl mx-auto">Follow these seven steps, derived from best practices, to build a successful and robust RAG system.</p>
+            </div>
+            <div id="accordion" class="space-y-4 max-w-4xl mx-auto">
+                <div class="accordion-item bg-secondary rounded-lg shadow">
+                    <button class="accordion-header w-full text-left p-4 font-semibold text-primary flex justify-between items-center">
+                        1. Prioritize Document Preprocessing
+                        <span class="accordion-icon text-accent text-2xl">+</span>
+                    </button>
+                    <div class="accordion-content">
+                        <div class="p-4 border-t border-gray-200 text-secondary">
+                            <p>The principle of "garbage in, garbage out" is paramount. Invest heavily in high-quality parsing and OCR. Use `unstructured.io` with the `High Res` strategy for PDFs with tables. Implement strict OCR best practices for scanned documents and establish a human-in-the-loop validation process for critical data.</p>
+                        </div>
+                    </div>
+                </div>
+
+                 <div class="accordion-item bg-secondary rounded-lg shadow">
+                    <button class="accordion-header w-full text-left p-4 font-semibold text-primary flex justify-between items-center">
+                        2. Adopt Optimal Chunking Strategies
+                        <span class="accordion-icon text-accent text-2xl">+</span>
+                    </button>
+                    <div class="accordion-content">
+                        <div class="p-4 border-t border-gray-200 text-secondary">
+                             <p>Use `unstructured.io`'s <strong>Contextual Chunking</strong> to prepend vital context to each chunk. Combine this with structural methods like `by_title` to respect document sections. Aim for moderate chunk sizes (~1,800 characters) with strategic overlap to maintain continuity without diluting relevance.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="accordion-item bg-secondary rounded-lg shadow">
+                    <button class="accordion-header w-full text-left p-4 font-semibold text-primary flex justify-between items-center">
+                        3. Select Domain-Adapted Components
+                        <span class="accordion-icon text-accent text-2xl">+</span>
+                    </button>
+                    <div class="accordion-content">
+                        <div class="p-4 border-t border-gray-200 text-secondary">
+                             <p>General-purpose models often fail on financial text. Use <strong>domain-adapted embedding models</strong> (e.g., fine-tuning on your data) for better semantic understanding. For your on-premise vector database, consider open-source options like Milvus or Weaviate for scalability.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="accordion-item bg-secondary rounded-lg shadow">
+                    <button class="accordion-header w-full text-left p-4 font-semibold text-primary flex justify-between items-center">
+                        4. Optimize Ollama & LLM Integration
+                        <span class="accordion-icon text-accent text-2xl">+</span>
+                    </button>
+                    <div class="accordion-content">
+                        <div class="p-4 border-t border-gray-200 text-secondary">
+                            <p>The default Ollama context length (2048 tokens) is too small for complex RAG. <strong>Increase the context window</strong> to at least 8192 tokens in your model settings. Select open-source LLMs (e.g., Llama 3 70B, Command R+) that support large context windows to ensure all retrieved information can be utilized.</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="accordion-item bg-secondary rounded-lg shadow">
+                    <button class="accordion-header w-full text-left p-4 font-semibold text-primary flex justify-between items-center">
+                        5. Implement Advanced Retrieval
+                        <span class="accordion-icon text-accent text-2xl">+</span>
+                    </button>
+                    <div class="accordion-content">
+                        <div class="p-4 border-t border-gray-200 text-secondary">
+                            <p>Go beyond simple vector search. Use <strong>Hybrid Search</strong>, which combines keyword-based (lexical) search with vector (semantic) search, to capture both exact terms and contextual meaning. Add a <strong>Re-ranking</strong> step, using a cross-encoder model to re-order the initial retrieved results for maximum relevance before sending them to the LLM.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="accordion-item bg-secondary rounded-lg shadow">
+                    <button class="accordion-header w-full text-left p-4 font-semibold text-primary flex justify-between items-center">
+                        6. Apply Best Practices in Prompting
+                        <span class="accordion-icon text-accent text-2xl">+</span>
+                    </button>
+                    <div class="accordion-content">
+                        <div class="p-4 border-t border-gray-200 text-secondary">
+                            <p>Craft clear and specific prompts that define the exact information required. Incorporate relevant keywords and context to guide the LLM. Prompt engineering is an iterative process; continuously test and refine prompts based on LLM output to improve accuracy and relevance.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="accordion-item bg-secondary rounded-lg shadow">
+                    <button class="accordion-header w-full text-left p-4 font-semibold text-primary flex justify-between items-center">
+                        7. Establish Robust Evaluation Frameworks
+                        <span class="accordion-icon text-accent text-2xl">+</span>
+                    </button>
+                    <div class="accordion-content">
+                        <div class="p-4 border-t border-gray-200 text-secondary">
+                            <p>You can't improve what you can't measure. Create a "gold standard" dataset of questions and verified answers specific to your financial use cases. Evaluate RAG performance using metrics like context relevance, answer correctness, and hallucination rate. Automate this testing to monitor for performance drift over time.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <footer class="bg-secondary mt-16">
+        <div class="container mx-auto px-6 py-4 text-center text-secondary text-sm">
+            <p>This interactive guide was generated based on the research report "Building a Robust On-Premise Retrieval-Augmented Generation System for Financial Data."</p>
+            <p>&copy; 2025 Financial RAG Playbook. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            
+            const workflowStages = document.querySelectorAll('.workflow-stage-container');
+            const workflowInfoContainer = document.getElementById('workflow-info');
+            const allInfoPanels = workflowInfoContainer.querySelectorAll('.workflow-info-panel');
+            
+            workflowStages.forEach(stage => {
+                stage.classList.add('bg-secondary', 'p-4', 'rounded-lg', 'shadow', 'cursor-pointer', 'hover:shadow-lg', 'hover:bg-accent-light', 'transition-all', 'duration-200', 'text-center');
+                stage.addEventListener('click', function() {
+                    const targetId = this.dataset.target;
+                    
+                    allInfoPanels.forEach(panel => {
+                        panel.classList.add('hidden');
+                    });
+                    
+                    document.getElementById(targetId).classList.remove('hidden');
+                    
+                    workflowStages.forEach(s => s.classList.remove('bg-accent-light'));
+                    this.classList.add('bg-accent-light');
+                });
+            });
+
+            const tabs = document.querySelectorAll('.tab-btn');
+            const tabPanes = document.querySelectorAll('.tab-pane');
+
+            tabs.forEach(tab => {
+                tab.addEventListener('click', function() {
+                    const targetId = this.dataset.target;
+                    
+                    tabs.forEach(t => {
+                        t.classList.remove('tab-active');
+                        t.classList.add('tab-inactive');
+                    });
+                    this.classList.add('tab-active');
+                    this.classList.remove('tab-inactive');
+                    
+                    tabPanes.forEach(pane => {
+                        if (pane.id === targetId) {
+                            pane.classList.remove('hidden');
+                        } else {
+                            pane.classList.add('hidden');
+                        }
+                    });
+                });
+            });
+
+            const accordionItems = document.querySelectorAll('.accordion-item');
+            accordionItems.forEach(item => {
+                const header = item.querySelector('.accordion-header');
+                const content = item.querySelector('.accordion-content');
+                const icon = item.querySelector('.accordion-icon');
+                
+                header.addEventListener('click', () => {
+                    const isOpen = content.style.maxHeight && content.style.maxHeight !== '0px';
+
+                    accordionItems.forEach(i => {
+                        i.querySelector('.accordion-content').style.maxHeight = '0px';
+                        i.querySelector('.accordion-icon').textContent = '+';
+                    })
+
+                    if (!isOpen) {
+                        content.style.maxHeight = content.scrollHeight + 'px';
+                        icon.textContent = '-';
+                    }
+                });
+            });
+
+            const renderChunkingStrategyChart = () => {
+                const ctx = document.getElementById('chunkingStrategyChart').getContext('2d');
+                new Chart(ctx, {
+                    type: 'polarArea',
+                    data: {
+                        labels: ['Contextual', 'Structural (by_title)', 'Semantic', 'Recursive', 'Fixed-Size'],
+                        datasets: [{
+                            label: 'Strategy Effectiveness for Finance',
+                            data: [9, 8, 7, 5, 3],
+                            backgroundColor: [
+                                'rgba(4, 120, 87, 0.6)',
+                                'rgba(5, 150, 105, 0.6)',
+                                'rgba(16, 185, 129, 0.6)',
+                                'rgba(110, 231, 183, 0.6)',
+                                'rgba(209, 250, 229, 0.6)'
+                            ],
+                            borderColor: 'rgba(4, 120, 87, 1)',
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                position: 'top',
+                            },
+                            title: {
+                                display: true,
+                                text: 'Comparison of Chunking Strategies',
+                                font: { size: 16 }
+                            },
+                             tooltip: {
+                                callbacks: {
+                                    label: function(context) {
+                                        let label = context.label || '';
+                                        if (label) {
+                                            label += ': ';
+                                        }
+                                        label += context.raw;
+                                        label += '/10';
+                                        return label;
+                                    }
+                                }
+                            }
+                        },
+                        scales: {
+                            r: {
+                                beginAtZero: true,
+                                max: 10
+                            }
+                        }
+                    }
+                });
+            };
+
+            const renderChunkSizeChart = () => {
+                const ctx = document.getElementById('chunkSizeChart').getContext('2d');
+                new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: ['Very Small (~500 chars)', 'Moderate (~1800 chars)', 'Very Large (~14k chars)'],
+                        datasets: [{
+                            label: 'Retrieval Performance',
+                            data: [75, 95, 80],
+                            backgroundColor: [
+                                'rgba(110, 231, 183, 0.6)',
+                                'rgba(4, 120, 87, 0.6)',
+                                'rgba(209, 250, 229, 0.6)',
+                            ],
+                            borderColor: [
+                                'rgba(16, 185, 129, 1)',
+                                'rgba(4, 120, 87, 1)',
+                                'rgba(110, 231, 183, 1)',
+                            ],
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        indexAxis: 'y',
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                display: false
+                            },
+                            title: {
+                                display: true,
+                                text: 'Impact of Chunk Size on Performance',
+                                font: { size: 16 }
+                            },
+                            tooltip: {
+                                callbacks: {
+                                    label: function(context) {
+                                        return 'Performance Score: ' + context.raw;
+                                    }
+                                }
+                            }
+                        },
+                         scales: {
+                            x: {
+                                beginAtZero: true,
+                                max: 100
+                            }
+                        }
+                    }
+                });
+            };
+            
+            renderChunkingStrategyChart();
+            renderChunkSizeChart();
+        });
+    </script>
+</body>
+</html>
