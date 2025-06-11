@@ -1,5 +1,5 @@
 # DeepMind: LLMs Assisted Research
-## This is for informational purposes only.
+**This is for informational purposes only.**
 
 ## Retrieval Augmented Generation (RAG)
 Retrieval-Augmented Generation (RAG) represents a transformative approach to leveraging Large Language Models (LLMs) by addressing their inherent limitations in factual accuracy and currency. At its core, RAG optimizes LLM outputs by referencing an authoritative knowledge base external to the model's original training data before generating a response. This mechanism significantly enhances both the factual precision and contextual relevance of the LLM's output.
